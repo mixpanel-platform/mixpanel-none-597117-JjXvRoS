@@ -7,7 +7,7 @@
   </head>
   <body class="mixpanel-platform-body">
     <div class="mixpanel-platform-section">
-      <div id="eventSelect" style="float: left;"></div>
+      <!--<div id="eventSelect" style="float: left;"></div>-->
       <div id="by" class="mixpanel-platform-label" style="margin-left: 10px; display: none;">by</div>
       <div id="propSelect" style="float: left;"></div>
       <div id="dateSelect" style="float: right;"></div>
@@ -16,7 +16,9 @@
     </div>
     <div id="table"></div>
     <script>
-      MP.api.ready(function() {
+      MP.api.ready(runReport);
+      
+      function runReport() {
         var eventSelect = $('#eventSelect').MPEventSelect();
         var propSelect  = $('#propSelect').MPPropertySelect();
         var dateSelect  = $('#dateSelect').MPDatepicker();
@@ -26,26 +28,41 @@
           firstColHeader: 'Event'
         });
 
-        var runQuery = function() {
-          var eventName = eventSelect.MPEventSelect('value'),
-              propName  = propSelect.MPPropertySelect('value'),
-              dateRange = dateSelect.MPDatepicker('value');
-
-          if (eventName) {
-            MP.api.segment(eventName, propName, dateRange).done(function(results) {
-              eventGraph.MPChart('setData', results);
-              eventTable.MPTable('setData', results);
+        function runQuery() {
+          var topEvents = [
+            "event_1",
+            "event_2",
+            "event_3"
+          ];
+          
+          var dateRange = dateSelect.MPDatepicker('value');
+          var data = {};
+          var appOpens = {};
+          
+          MP.api.segment('event_2', undefined, dateRange).done(function(results) {
+            appOpens = results;
+          });
+          
+          topEvents.forEach(function(eventName) {
+            MP.api.segment(eventName, undefined, dateRange).done(function(results) {
+              console.log(results);
+              // eventsPerAppOpen = dividePerAppOpen(results.values()[eventName], appOpens);
+              data[eventName] = results.divide(appOpens).values()[eventName];
+              eventGraph.MPChart('setData', data);
+              console.log(data);
             });
-          }
+          });
+          
+          function dividePerAppOpen(data, appOpens) {
+            for (key in data) {
+              data[key] = data[key]/appOpens[key];
+            }
+          };
         };
-        eventSelect.on('change', function(e, eventName) {
-          propSelect.MPPropertySelect('setEvent', eventName);
-          $("#by").show();
-          runQuery();
-        });
-        propSelect.on('change', runQuery);
+        
+        runQuery();
         dateSelect.on('change', runQuery);
-      });
+      }
     </script>
   </body>
 </html>
