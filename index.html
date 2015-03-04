@@ -9,7 +9,14 @@
     <div class="mixpanel-platform-section">
       <!--<div id="eventSelect" style="float: left;"></div>-->
       <div id="by" class="mixpanel-platform-label" style="margin-left: 10px; display: none;">by</div>
-      <div id="propSelect" style="float: left;"></div>
+      
+      <div class="finish_rate" style="
+        font-size: 30px;
+        line-height: 30px; font-weight: 500; text-shadow: 0 1px 0 #fff; color: #5c617b; 
+        display: block; vertical-align: top;
+        text-align: center;
+      ">Top Events per App Open</div>
+      <!--<div id="propSelect" style="float: left;"></div>-->
       <div id="dateSelect" style="float: right;"></div>
       <div style="clear: both;"></div>
       <div id="graph"></div>
@@ -46,18 +53,11 @@
           topEvents.forEach(function(eventName) {
             MP.api.segment(eventName, undefined, dateRange).done(function(results) {
               console.log(results);
-              // eventsPerAppOpen = dividePerAppOpen(results.values()[eventName], appOpens);
               data[eventName] = results.divide(appOpens).values()[eventName];
               eventGraph.MPChart('setData', data);
               console.log(data);
             });
           });
-          
-          function dividePerAppOpen(data, appOpens) {
-            for (key in data) {
-              data[key] = data[key]/appOpens[key];
-            }
-          };
         };
         
         runQuery();
